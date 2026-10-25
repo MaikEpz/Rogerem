@@ -1,0 +1,18 @@
+---
+import '../styles/global.css';
+import { sitePath } from '../navigation/paths';
+interface Props { title: string; description?: string }
+const { title, description = 'Cuatro figuras. Cuatro formas de sentir. Un encuentro con la música de Génesis y la escena local.' } = Astro.props;
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#1c1d1b" />
+    <link rel="icon" type="image/svg+xml" href={sitePath('favicon.svg')} />
+    <title>{title}</title>
+  </head>
+  <body><a class="skip-link" href="#main">Saltar al contenido</a><slot /></body>
+</html>

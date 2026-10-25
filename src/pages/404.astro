@@ -1,0 +1,6 @@
+---
+import BaseLayout from '../presentation/layouts/BaseLayout.astro';
+import Brand from '../presentation/components/Brand.astro';
+import { sitePath } from '../presentation/navigation/paths';
+---
+<BaseLayout title="Destino desconocido — Génesis"><main id="main" class="not-found"><Brand /><p class="eyebrow">ERROR 404 / DESTINO DESCONOCIDO</p><h1>Te saliste de órbita.</h1><p>Tu próxima canción todavía te está esperando.</p><a href={sitePath()} class="back-link">← Volver a las figuras</a></main></BaseLayout>

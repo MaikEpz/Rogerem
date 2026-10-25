@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../presentation/layouts/BaseLayout.astro';
+import Brand from '../presentation/components/Brand.astro';
+import Figure from '../presentation/components/Figure.astro';
+import { destinationService } from '../composition/destinations';
+import { sitePath } from '../presentation/navigation/paths';
+const destinations = destinationService.list();
+---
+<BaseLayout title="Génesis — Selecciona tu destino">
+  <div class="portal">
+    <header class="portal__header"><a class="brand-link" href={sitePath()} aria-label="Génesis, inicio"><Brand small /></a><span class="micro">EXPERIMENTO SONORO Nº 001 <span class="live-dot"></span></span></header>
+    <main id="main" class="selection">
+      <p class="eyebrow"><span class="tiny-cross">✳</span> NO LLEGASTE AQUÍ POR CASUALIDAD</p>
+      <h1>SELECCIONA UNA FIGURA<br />PARA CONOCER TU DESTINO</h1>
+      <p class="selection__intro">No lo pienses demasiado. Deja que algo te elija.</p>
+      <div class="figure-grid" aria-label="Elige una figura para descubrir tu selección musical">
+        {destinations.map((destination) => <a class={`figure-choice figure-choice--${destination.symbol}`} href={sitePath(`destino/${destination.slug}/`)} style={`--accent: ${destination.color}`} aria-label={`${destination.name}: ${destination.mood.toLowerCase()}`}>
+          <span class="figure-choice__number">{destination.number}</span>
+          <Figure symbol={destination.symbol} />
+          <span class="figure-choice__label">{destination.name}<span aria-hidden="true">↗</span></span>
+        </a>)}
+      </div>
+      <p class="selection__hint"><span class="hint-line"></span> CUATRO ENTRADAS. UN UNIVERSO PROPIO. <span class="hint-line"></span></p>
+    </main>
+    <footer class="portal__footer"><span class="micro">EL FUTURO NO SE PREDICE.<br />SE ESCUCHA.</span><Brand /><button class="text-button micro" data-open-disclaimer>LEE LA LETRA PEQUEÑA ↗</button></footer>
+  </div>
+  <dialog class="disclaimer" aria-labelledby="disclaimer-title">
+    <form method="dialog"><button class="disclaimer__close" aria-label="Cerrar aviso">×</button></form>
+    <span class="eyebrow">LA LETRA PEQUEÑA</span><h2 id="disclaimer-title">Tu destino no está escrito.</h2>
+    <p>Esto no es un oráculo, una evaluación psicológica ni una señal del más allá. Es una invitación a escuchar música y ver qué te pasa.</p>
+    <p>Las figuras no leen tu mente. Pero quizá una canción sí encuentre las palabras.</p>
+    <p class="demo-note">Versión de demostración: textos y canciones de ejemplo. Los enlaces de las playlists están pendientes.</p>
+  </dialog>
+  <script>
+    const disclaimer = document.querySelector<HTMLDialogElement>('.disclaimer');
+    document.querySelector('[data-open-disclaimer]')?.addEventListener('click', () => disclaimer?.showModal());
+    disclaimer?.addEventListener('click', (event) => { if (event.target === disclaimer) { const bounds = disclaimer.getBoundingClientRect(); if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) disclaimer.close(); } });
+  </script>
+</BaseLayout>

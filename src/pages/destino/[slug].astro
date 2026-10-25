@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../../presentation/layouts/BaseLayout.astro';
+import Brand from '../../presentation/components/Brand.astro';
+import Figure from '../../presentation/components/Figure.astro';
+import { destinationService } from '../../composition/destinations';
+import type { Destination } from '../../domain/destination';
+import { sitePath } from '../../presentation/navigation/paths';
+
+export function getStaticPaths() {
+  return destinationService.list().map((destination) => ({ params: { slug: destination.slug }, props: { destination } }));
+}
+interface Props { destination: Destination }
+const { destination } = Astro.props;
+const options = destinationService.listeningOptions(destination.slug);
+const labels = { bandcamp: 'Bandcamp', appleMusic: 'Apple Music', youtubeMusic: 'YouTube Music', spotify: 'Spotify' };
+---
+<BaseLayout title={`${destination.name} — Génesis`} description={destination.introduction}>
+  <div class={`destination destination--${destination.scene}`} style={`--accent: ${destination.color}`}>
+    <div class="scene" aria-hidden="true"><div class="scene__image"></div><div class="scene__shade"></div><div class="scene__grain"></div></div>
+    <header class="destination__header"><a class="back-link micro" href={sitePath()}><span aria-hidden="true">←</span> VOLVER A LAS FIGURAS</a><a class="brand-link" href={sitePath()} aria-label="Génesis, inicio"><Brand small /></a></header>
+    <main id="main" class="destination__main">
+      <div class="destination__coordinates micro"><span>ARCHIVO {destination.number} / 04</span><span>{destination.mood}</span></div>
+      <section class="retro-window" aria-labelledby="window-title">
+        <div class="retro-window__titlebar"><span class="window-icon" aria-hidden="true">▧</span><h1 id="window-title">EVALUACIÓN PARA PERSONAL DE GÉNESIS, INC.</h1><a href={sitePath()} class="retro-close" aria-label="Cerrar evaluación y volver al inicio">×</a></div>
+        <div class="retro-window__menubar"><span>Archivo</span><span>Destino</span><span class="retro-window__status">Conexión establecida <span aria-hidden="true">●</span></span></div>
+        <div class="retro-window__body">
+          <div class="reading-panel">
+            <div class="reading-panel__top"><span class="micro">RESULTADO DE TU SELECCIÓN</span><Figure symbol={destination.symbol} /></div>
+            <p class="reading-panel__id micro">{destination.number} — {destination.name.toUpperCase()}</p>
+            <h2>{destination.title}</h2>
+            <p class="reading-panel__text" data-reading aria-live="polite">{destination.introduction}</p>
+            <span class="reading-panel__cursor" aria-hidden="true">_</span>
+          </div>
+          <div class="playlist-heading"><span class="micro">UNA SELECCIÓN PARA ESTE MOMENTO</span><span class="micro">♫ &nbsp; 03 TRACKS · DEMO</span></div>
+          <ol class="track-list">{destination.tracks.map((track, index) => <li><span class="track-list__number">0{index + 1}</span><span class="track-list__info"><span>{track.title}</span><small>{track.artist}</small></span><span class="track-list__duration">{track.duration}</span></li>)}</ol>
+          <div class="retro-actions"><button class="retro-button" data-message={destination.revelation} aria-pressed="false">¿QUÉ?</button><button class="retro-button retro-button--primary" data-open-listen><span aria-hidden="true">▶</span> ESCUCHAR</button><button class="retro-button" data-message={destination.catharsis} aria-pressed="false">LLORAR :(</button></div>
+          <p class="retro-window__footnote" data-window-status aria-live="polite">Tu selección ha sido recibida. Lo demás puede esperar.</p>
+        </div>
+        <div class="retro-statusbar"><span>GÉNESIS_OS / 1998</span><span>ESTADO: SINTIENDO</span><span class="resize-grip" aria-hidden="true">◢</span></div>
+      </section>
+      <p class="destination__caption micro">ALGUNAS RESPUESTAS LLEGAN EN FORMA DE CANCIÓN.</p>
+    </main>
+    <footer class="destination__footer"><span class="micro">ESTÁS EXACTAMENTE DONDE DEBES ESTAR.</span><span class="micro">CONTENIDO DE DEMOSTRACIÓN</span></footer>
+  </div>
+  <dialog class="listen-dialog retro-window" aria-labelledby="listen-title">
+    <div class="retro-window__titlebar"><span class="window-icon" aria-hidden="true">♫</span><h2 id="listen-title">ABRIR CON...</h2><form method="dialog"><button class="retro-close" aria-label="Cerrar opciones de escucha">×</button></form></div>
+    <div class="listen-dialog__body"><p>Elige dónde quieres encontrarte.</p><span class="micro">{destination.name.toUpperCase()} / {destination.mood}</span>
+      <ul class="platform-list">{options.map(({ platform, url }, index) => <li>{url ? <a href={url} target="_blank" rel="noopener noreferrer"><span class="platform-icon" aria-hidden="true">{['◩', '♫', '▶', '≋'][index]}</span><span>{labels[platform]}</span><span aria-hidden="true">↗</span></a> : <button disabled><span class="platform-icon" aria-hidden="true">{['◩', '♫', '▶', '≋'][index]}</span><span>{labels[platform]}</span><small>Próximamente</small></button>}</li>)}</ul>
+      <p class="listen-dialog__note">Esta es una versión de muestra. Las playlists estarán disponibles cuando se añadan los enlaces definitivos.</p>
+    </div>
+  </dialog>
+  <script>
+    const dialog = document.querySelector<HTMLDialogElement>('.listen-dialog');
+    document.querySelector('[data-open-listen]')?.addEventListener('click', () => dialog?.showModal());
+    dialog?.addEventListener('click', (event) => { if (event.target === dialog) { const bounds = dialog.getBoundingClientRect(); if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close(); } });
+    document.querySelectorAll<HTMLButtonElement>('[data-message]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const reading = document.querySelector('[data-reading]');
+        if (reading) reading.textContent = button.dataset.message ?? '';
+        document.querySelectorAll('[data-message]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+        const status = document.querySelector('[data-window-status]');
+        if (status) status.textContent = button.textContent === 'LLORAR :(' ? 'Puedes sentirlo todo. Este espacio es tuyo.' : 'Mensaje descifrado. Sigue tu intuición.';
+      });
+    });
+  </script>
+</BaseLayout>
